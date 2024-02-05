@@ -1,0 +1,9 @@
+service: () -> {
+    contribute: (text, nat64) -> (variant {Ok:text; Err:variant {AuthorizationError:text; ContributionError:text; CampaignNotFound:text; ValidationError:text; StorageError:text}});
+    createCampaign: (record {title:text; goalAmount:nat64; description:text}) -> (variant {Ok:text; Err:variant {AuthorizationError:text; ContributionError:text; CampaignNotFound:text; ValidationError:text; StorageError:text}});
+    deleteCampaign: (text) -> (variant {Ok:text; Err:variant {AuthorizationError:text; ContributionError:text; CampaignNotFound:text; ValidationError:text; StorageError:text}});
+    getCampaign: (text) -> (variant {Ok:record {title:text; goalAmount:nat64; description:text}; Err:variant {AuthorizationError:text; ContributionError:text; CampaignNotFound:text; ValidationError:text; StorageError:text}}) query;
+    getCampaigns: () -> (variant {Ok:vec record {title:text; goalAmount:nat64; description:text}; Err:variant {AuthorizationError:text; ContributionError:text; CampaignNotFound:text; ValidationError:text; StorageError:text}}) query;
+    listContributions: (text) -> (variant {Ok:vec record {timestamp:nat64; amount:nat64; contributor:text}; Err:variant {AuthorizationError:text; ContributionError:text; CampaignNotFound:text; ValidationError:text; StorageError:text}}) query;
+    withdrawFunds: (text) -> (variant {Ok:text; Err:variant {AuthorizationError:text; ContributionError:text; CampaignNotFound:text; ValidationError:text; StorageError:text}});
+}

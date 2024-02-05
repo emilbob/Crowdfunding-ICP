@@ -1,0 +1,13 @@
+{
+  "canisters": {
+    "crowdfund": {
+      "type": "custom",
+      "main": "src/index.ts",
+      "candid": "src/index.did",
+      "build": "npx azle crowdfund",
+      "ts": "src/index.ts",
+      "wasm": ".azle/crowdfund/crowdfund.wasm",
+      "gzip": true
+    }
+  }
+}
