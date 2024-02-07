@@ -1,3 +1,4 @@
+// Importing necessary modules from the 'azle' library and 'uuid' library
 import {
   query,
   update,
@@ -16,6 +17,7 @@ import {
 } from "azle";
 import { v4 as uuidv4 } from "uuid";
 
+// Defining record types for different entities
 const CampaignPayload = Record({
   title: text,
   description: text,
@@ -51,11 +53,12 @@ const Error = Variant({
   StorageError: text,
 });
 
+// Creating instances of StableBTreeMap for each entity type
 const campaignsStorage = StableBTreeMap<text, Campaign>(0);
 const contributionsStorage = StableBTreeMap<text, Vec<Contribution>>(1);
 
 export default Canister({
-  //Update methods
+  // Update methods
 
   // Create campaign
   createCampaign: update(
@@ -110,7 +113,7 @@ export default Canister({
           ContributionError: `Campaign with id=${campaignId} has successfully reached its funding goal. No further contributions are needed.`,
         });
       }
-      // Prevent contribution from exceeding goal amount
+
       const newAmount = campaign.currentAmount + amount;
       if (newAmount > campaign.goalAmount) {
         return Err({
@@ -133,7 +136,7 @@ export default Canister({
     }
   ),
 
-  //Withdraw funds
+  // Withdraw funds
   withdrawFunds: update([text], Result(text, Error), (campaignId) => {
     const campaignOpt = campaignsStorage.get(campaignId);
     if ("None" in campaignOpt) {
@@ -142,22 +145,35 @@ export default Canister({
       });
     }
     const campaign = campaignOpt.Some;
-    if (ic.caller() !== campaign.owner) {
+
+    if (ic.caller().toString() !== campaign.owner.toString()) {
       return Err({
-        AuthorizationError: "Only the campaign owner can withdraw funds",
+        AuthorizationError: `Only the campaign owner can withdraw funds. Caller: ${ic
+          .caller()
+          .toString()}, Owner: ${campaign.owner.toString()}`,
       });
     }
+
     if (campaign.currentAmount < campaign.goalAmount) {
       return Err({
-        AuthorizationError: "Campaign has not reached its funding goal",
+        ValidationError:
+          "Cannot withdraw funds as the campaign has not reached its funding goal.",
       });
     }
-    return Ok(
-      `Successfully withdrawn goal amount from the ${campaignId} camapign`
-    );
+
+    if (campaign.currentAmount === 0n) {
+      return Err({
+        ValidationError: "Funds have already been withdrawn for this campaign.",
+      });
+    }
+
+    campaign.currentAmount = 0n;
+    campaignsStorage.insert(campaignId, campaign);
+
+    return Ok(`Funds successfully withdrawn for campaign ${campaignId}`);
   }),
 
-  //Delete campaign
+  // Delete campaign
   deleteCampaign: update([text], Result(text, Error), (campaignId) => {
     const campaignOpt = campaignsStorage.get(campaignId);
     if ("None" in campaignOpt) {
@@ -166,22 +182,22 @@ export default Canister({
       });
     }
     const campaign = campaignOpt.Some;
-    // Check if caller is the owner and goal is reached
-    if (ic.caller() !== campaign.owner) {
+
+    if (ic.caller().toString() !== campaign.owner.toString()) {
       return Err({
-        AuthorizationError: "Only the campaign owner can delete this campaign",
+        AuthorizationError: `Only the campaign owner can delete this campaign. Caller: ${ic
+          .caller()
+          .toString()}, Owner: ${campaign.owner.toString()}`,
       });
     }
-    if (campaign.currentAmount < campaign.goalAmount) {
-      return Err({ ValidationError: "Campaign goal has not been reached yet" });
-    }
+
     campaignsStorage.remove(campaignId);
     return Ok(`Campaign ${campaignId} deleted successfully`);
   }),
 
   //   //Query methods
 
-  //Get one campaign by id
+  // Get one campaign by id
   getCampaign: query([text], Result(Campaign, Error), (id) => {
     const campaignOpt = campaignsStorage.get(id);
     if ("None" in campaignOpt) {
@@ -190,7 +206,6 @@ export default Canister({
     return Ok(campaignOpt.Some);
   }),
 
-  //Get campaigns
   // Get campaigns
   getCampaigns: query([], Result(Vec(Campaign), Error), () => {
     const campaigns: Campaign[] = [];
@@ -200,7 +215,7 @@ export default Canister({
     return Ok(campaigns);
   }),
 
-  //List contributions
+  // List contributions
   listContributions: query(
     [text],
     Result(Vec(Contribution), Error),
