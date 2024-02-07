@@ -49,7 +49,7 @@ all campaigns and choose the one they like. Campaign owner can withdraw collecte
 
   - Purpose: Enables users to contribute to an existing campaign by specifying its ID and the contribution amount.
   - Parameters: campaignId (text): Unique identifier of the campaign to contribute to.
-    - amount (nat64): Amount to contribute to the campaign.
+    amount (nat64): Amount to contribute to the campaign.
   - Returns: Result(text, Error): Confirmation of contribution on success, or an error message on failure.
 
 - withdrawFunds
@@ -86,17 +86,19 @@ all campaigns and choose the one they like. Campaign owner can withdraw collecte
 
   Now that we have our canister code, let us build and deploy our canister.
 
-  - First, let us start our local Azle replica in the background . Run the following command in your terminal:
-    `dfx start --background
+  First, let us start our local Azle replica in the background . Run the following command in your terminal:
+
+  - dfx start --background
 
   ### IMPORTANT NOTE
 
   If you make any changes to the StableBTreeMap structure like change datatypes for keys or values, changing size of the key or value, you need to restart dfx with the –clean flag. StableBTreeMap is immutable and any changes to it's configuration after it's been initialized are not supported.
 
-  `dfx start --background --clean
+  - dfx start --background --clean
 
-  - Next, let us build and deploy our canister. Run the following command in your terminal:
-    `dfx deploy
+  Next, let us build and deploy our canister. Run the following command in your terminal:
+
+  - dfx deploy
 
   If this is your first time running the command, which most likely it is, this may take a bit of time to boot up, so sit back and relax.
   Once its done, you should see a similar output:
@@ -112,26 +114,26 @@ We have two ways of interacting with our canister. We can either use the command
 
 - Command line interface
 
-`dfx canister call <canister_name> createCampaign '(record {title = "Campaign Title"; description = "Campaign Description"; goalAmount = <goal_amount>})'
+  - dfx canister call <canister_name> createCampaign '(record {title = "Campaign Title"; description = "Campaign Description"; goalAmount = <goal_amount>})'
 
-`dfx canister call <canister_name> contribute '(record {campaignId = "<campaign_id>"; amount = <contribution_amount>})'
+  - dfx canister call <canister_name> contribute '(record {campaignId = "<campaign_id>"; amount = <contribution_amount>})'
 
-`dfx canister call <canister_name> withdrawFunds '(record {campaignId = "<campaign_id>"})'
+  - dfx canister call <canister_name> withdrawFunds '(record {campaignId = "<campaign_id>"})'
 
-`dfx canister call <canister_name> deleteCampaign '(record {campaignId = "<campaign_id>"})'
+  - dfx canister call <canister_name> deleteCampaign '(record {campaignId = "<campaign_id>"})'
 
-`dfx canister call <canister_name> getCampaign '(record {id = "<campaign_id>"})'
+  - dfx canister call <canister_name> getCampaign '(record {id = "<campaign_id>"})'
 
-`dfx canister call <canister_name> getCampaigns '()'
+  - dfx canister call <canister_name> getCampaigns '()'
 
-`dfx canister call <canister_name> listContributions '(record {campaignId = "<campaign_id>"})'
+  - dfx canister call <canister_name> listContributions '(record {campaignId = "<campaign_id>"})'
 
 - Web interface
   Just as we used the interface to get the message we just created in the previous section, you can use it add, update, delete, and get messages from your canister as well as call other functions you may add in your cannister.
 
 Finally, you can shut down your local Azle replica by running the following command in your terminal:
 
-`dfx stop
+- dfx stop
 
 ### Contributing
 
