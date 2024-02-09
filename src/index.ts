@@ -57,6 +57,18 @@ const Error = Variant({
 const campaignsStorage = StableBTreeMap<text, Campaign>(0);
 const contributionsStorage = StableBTreeMap<text, Vec<Contribution>>(1);
 
+function checkCampaignExistsAndActive(campaignId: text): Result<Campaign, Error> {
+  const campaignOpt = campaignsStorage.get(campaignId);
+  if ("None" in campaignOpt) {
+    return Err({
+      CampaignNotFound: `Campaign with id=${campaignId} not found`,
+    });
+  }
+
+  const campaign = campaignOpt.Some;
+  return Ok(campaign);
+}
+
 export default Canister({
   // Update methods
 
@@ -98,16 +110,15 @@ export default Canister({
     [text, nat64],
     Result(text, Error),
     (campaignId, amount) => {
-      const campaignOpt = campaignsStorage.get(campaignId);
-      if ("None" in campaignOpt) {
-        return Err({
-          CampaignNotFound: `Campaign with id=${campaignId} not found`,
-        });
+      let campaign = checkCampaignExistsAndActive(campaignId);
+      if(Err.is(campaign)){
+        return campaign;
       }
-      let campaign = campaignOpt.Some;
+
       if (ic.time() > campaign.endDate) {
-        return Err({ ValidationError: "This campaign has already ended." });
+        return Err({ValidationError: "This campaign has already ended."});
       }
+
       if (campaign.currentAmount >= campaign.goalAmount) {
         return Err({
           ContributionError: `Campaign with id=${campaignId} has successfully reached its funding goal. No further contributions are needed.`,
@@ -139,12 +150,10 @@ export default Canister({
   // Withdraw funds
   withdrawFunds: update([text], Result(text, Error), (campaignId) => {
     const campaignOpt = campaignsStorage.get(campaignId);
-    if ("None" in campaignOpt) {
-      return Err({
-        CampaignNotFound: `Campaign with id=${campaignId} not found`,
-      });
+    let campaign = checkCampaignExistsAndActive(campaignId);
+    if(Err.is(campaign)){
+      return campaign;
     }
-    const campaign = campaignOpt.Some;
 
     if (ic.caller().toString() !== campaign.owner.toString()) {
       return Err({
@@ -175,13 +184,10 @@ export default Canister({
 
   // Delete campaign
   deleteCampaign: update([text], Result(text, Error), (campaignId) => {
-    const campaignOpt = campaignsStorage.get(campaignId);
-    if ("None" in campaignOpt) {
-      return Err({
-        CampaignNotFound: `Campaign with id=${campaignId} not found`,
-      });
+    let campaign = checkCampaignExistsAndActive(campaignId);
+    if(Err.is(campaign)){
+      return campaign;
     }
-    const campaign = campaignOpt.Some;
 
     if (ic.caller().toString() !== campaign.owner.toString()) {
       return Err({
@@ -199,11 +205,10 @@ export default Canister({
 
   // Get one campaign by id
   getCampaign: query([text], Result(Campaign, Error), (id) => {
-    const campaignOpt = campaignsStorage.get(id);
-    if ("None" in campaignOpt) {
-      return Err({ CampaignNotFound: `Campaign with id=${id} not found` });
+    let campaign = checkCampaignExistsAndActive(id);
+    if(Err.is(campaign)){
+      return campaign;
     }
-    return Ok(campaignOpt.Some);
   }),
 
   // Get campaigns
