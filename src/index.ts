@@ -24,6 +24,8 @@ const CampaignPayload = Record({
   goalAmount: nat64,
 });
 
+type CampaignPayload = typeof CampaignPayload.tsType;
+
 const Campaign = Record({
   id: text,
   title: text,
@@ -53,9 +55,19 @@ const Error = Variant({
   StorageError: text,
 });
 
+type Error = typeof Error.tsType;
+
 // Creating instances of StableBTreeMap for each entity type
 const campaignsStorage = StableBTreeMap<text, Campaign>(0);
 const contributionsStorage = StableBTreeMap<text, Vec<Contribution>>(1);
+
+// Defined constants for time conversion
+const NANOS_PER_SECOND = 1_000_000_000n;
+const SECONDS_PER_MINUTE = 60n;
+const MINUTES_PER_HOUR = 60n;
+const HOURS_PER_DAY = 24n;
+const NANOS_PER_DAY =
+  HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MINUTE * NANOS_PER_SECOND;
 
 export default Canister({
   // Update methods
@@ -76,8 +88,7 @@ export default Canister({
         });
       }
       const campaignId = uuidv4();
-      const twentyFourHoursInNanoseconds = 24n * 60n * 60n * 1_000_000_000n;
-      const endDate = ic.time() + twentyFourHoursInNanoseconds;
+      const endDate = ic.time() + NANOS_PER_DAY;
       const newCampaign = {
         id: campaignId,
         title: campaignPayload.title,
