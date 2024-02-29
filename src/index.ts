@@ -47,6 +47,7 @@ const Contribution = Record({
 
 type Contribution = typeof Contribution.tsType;
 
+//Defining error variants
 const Error = Variant({
   CampaignNotFound: text,
   ContributionError: text,
@@ -69,8 +70,50 @@ const HOURS_PER_DAY = 24n;
 const NANOS_PER_DAY =
   HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MINUTE * NANOS_PER_SECOND;
 
+/**
+ * Helper functions
+ */
+
+//Helper function to get campaign by id
+function getCampaign(campaignId: text): Result<Campaign, Error> {
+  const campaignOpt = campaignsStorage.get(campaignId);
+  if ("None" in campaignOpt) {
+    return Err({
+      CampaignNotFound: `Campaign with id=${campaignId} not found`,
+    });
+  }
+
+  return Ok(campaignOpt.Some);
+}
+
+// Helper function for campaign not found errors
+function campaignNotFoundError(campaignId: text): Result<never, Error> {
+  return Err({
+    CampaignNotFound: `Campaign with id=${campaignId} not found`,
+  });
+}
+
+// Helper function for authorization errors
+function authorizationError(
+  caller: Principal,
+  owner: Principal
+): Result<never, Error> {
+  return Err({
+    AuthorizationError: `Unauthorized access. Caller: ${caller.toString()}, Required: ${owner.toString()}`,
+  });
+}
+
+// Helper function for validation errors
+function validationError(message: text): Result<never, Error> {
+  return Err({
+    ValidationError: message,
+  });
+}
+
 export default Canister({
-  // Update methods
+  /**
+   * update methods
+   */
 
   // Create campaign
   createCampaign: update(
@@ -82,10 +125,9 @@ export default Canister({
         !campaignPayload.description ||
         campaignPayload.goalAmount <= 0n
       ) {
-        return Err({
-          ValidationError:
-            "Invalid input data: Ensure title, description are present and goal amount is positive.",
-        });
+        return validationError(
+          "Invalid input data: Ensure title, description are present and goal amount is positive."
+        );
       }
       const campaignId = uuidv4();
       const endDate = ic.time() + NANOS_PER_DAY;
@@ -109,13 +151,15 @@ export default Canister({
     [text, nat64],
     Result(text, Error),
     (campaignId, amount) => {
-      const campaignOpt = campaignsStorage.get(campaignId);
-      if ("None" in campaignOpt) {
-        return Err({
-          CampaignNotFound: `Campaign with id=${campaignId} not found`,
-        });
+      if (amount <= 0n) {
+        return validationError("Contribution amount must be positive.");
       }
-      let campaign = campaignOpt.Some;
+
+      const campaignResult = getCampaign(campaignId);
+      if ("Err" in campaignResult) {
+        return campaignNotFoundError(campaignId);
+      }
+      let campaign = campaignResult.Ok;
       if (ic.time() > campaign.endDate) {
         return Err({ ValidationError: "This campaign has already ended." });
       }
@@ -149,20 +193,14 @@ export default Canister({
 
   // Withdraw funds
   withdrawFunds: update([text], Result(text, Error), (campaignId) => {
-    const campaignOpt = campaignsStorage.get(campaignId);
-    if ("None" in campaignOpt) {
-      return Err({
-        CampaignNotFound: `Campaign with id=${campaignId} not found`,
-      });
+    const campaignResult = getCampaign(campaignId);
+    if ("Err" in campaignResult) {
+      return campaignNotFoundError(campaignId);
     }
-    const campaign = campaignOpt.Some;
+    let campaign = campaignResult.Ok;
 
     if (ic.caller().toString() !== campaign.owner.toString()) {
-      return Err({
-        AuthorizationError: `Only the campaign owner can withdraw funds. Caller: ${ic
-          .caller()
-          .toString()}, Owner: ${campaign.owner.toString()}`,
-      });
+      return authorizationError(ic.caller(), campaign.owner);
     }
 
     if (campaign.currentAmount < campaign.goalAmount) {
@@ -186,33 +224,30 @@ export default Canister({
 
   // Delete campaign
   deleteCampaign: update([text], Result(text, Error), (campaignId) => {
-    const campaignOpt = campaignsStorage.get(campaignId);
-    if ("None" in campaignOpt) {
-      return Err({
-        CampaignNotFound: `Campaign with id=${campaignId} not found`,
-      });
+    const campaignResult = getCampaign(campaignId);
+    if ("Err" in campaignResult) {
+      return campaignNotFoundError(campaignId);
     }
-    const campaign = campaignOpt.Some;
+    let campaign = campaignResult.Ok;
 
     if (ic.caller().toString() !== campaign.owner.toString()) {
-      return Err({
-        AuthorizationError: `Only the campaign owner can delete this campaign. Caller: ${ic
-          .caller()
-          .toString()}, Owner: ${campaign.owner.toString()}`,
-      });
+      return authorizationError(ic.caller(), campaign.owner);
     }
 
     campaignsStorage.remove(campaignId);
     return Ok(`Campaign ${campaignId} deleted successfully`);
   }),
 
-  //   //Query methods
+  /**
+   * Query methods
+   */
 
   // Get one campaign by id
-  getCampaign: query([text], Result(Campaign, Error), (id) => {
-    const campaignOpt = campaignsStorage.get(id);
+
+  getCampaign: query([text], Result(Campaign, Error), (campaignId) => {
+    const campaignOpt = campaignsStorage.get(campaignId);
     if ("None" in campaignOpt) {
-      return Err({ CampaignNotFound: `Campaign with id=${id} not found` });
+      return campaignNotFoundError(campaignId);
     }
     return Ok(campaignOpt.Some);
   }),
@@ -233,9 +268,7 @@ export default Canister({
     (campaignId) => {
       const contributionsOpt = contributionsStorage.get(campaignId);
       if ("None" in contributionsOpt) {
-        return Err({
-          CampaignNotFound: `No contributions found for campaign with id=${campaignId}`,
-        });
+        return campaignNotFoundError(campaignId);
       }
       return Ok(contributionsOpt.Some);
     }
