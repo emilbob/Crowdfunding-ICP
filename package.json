@@ -3,7 +3,7 @@
   "main": "index.js",
   "dependencies": {
     "@dfinity/agent": "^0.19.2",
-    "@dfinity/candid": "^0.19.2",
+    "@dfinity/candid": "^3.4.3",
     "azle": "^0.20.1",
     "uuid": "^14.0.1"
   },
