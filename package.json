@@ -2,7 +2,7 @@
   "name": "crowdfund",
   "main": "index.js",
   "dependencies": {
-    "@dfinity/agent": "^0.19.2",
+    "@dfinity/agent": "^3.4.3",
     "@dfinity/candid": "^0.19.2",
     "azle": "^0.20.1",
     "uuid": "^14.0.1"
