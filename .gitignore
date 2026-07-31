@@ -11,10 +11,10 @@
 .dfx/
 
 # generated files
-# NOTE: src/declarations/ is deliberately NOT ignored. The frontend imports the
-# Candid bindings statically, so builds that have no dfx — the static demo, and
-# its Pages workflow — cannot generate them. CI regenerates and diffs them, so
-# committing them cannot go stale silently.
+# NOTE: frontend/src/declarations/ is deliberately NOT ignored. The frontend
+# imports the Candid bindings statically, so a build with no dfx — the static
+# demo on Vercel — cannot generate them. CI regenerates and diffs them, so the
+# committed copy cannot go stale silently.
 
 # frontend code
 node_modules/
