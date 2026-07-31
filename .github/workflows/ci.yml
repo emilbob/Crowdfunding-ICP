@@ -33,6 +33,23 @@ jobs:
       # typechecks it anyway: the frontend's build script is `tsc -b && vite
       # build`, so a type error fails that job.
 
+  # Mirrors exactly what Vercel does: install ONLY frontend/, then build the
+  # demo. The other jobs run a root `npm ci` first, so anything the frontend
+  # resolves from the root node_modules — @types/node was the one that bit —
+  # looks fine there and fails on Vercel. This job has no root install on
+  # purpose; do not add one.
+  demo-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm --prefix frontend ci
+      - run: npm --prefix frontend run build:demo
+
   build-and-test:
     runs-on: ubuntu-latest
     steps:
