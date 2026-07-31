@@ -1,5 +1,11 @@
 version: 2
 updates:
+  # Action majors are almost purely runner-runtime bumps (node20 -> node24), so
+  # they are exactly the updates worth seeing. A blanket semver-major ignore
+  # filters out precisely those and lets nothing through, which is how pinned
+  # actions silently drift several majors behind. No ignore here on purpose:
+  # majors arrive as their own PR, outside the grouped patch/minor auto-merge,
+  # so a human still reviews them.
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -10,9 +16,7 @@ updates:
         update-types:
           - minor
           - patch
-    ignore:
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
+
   - package-ecosystem: npm
     directory: /
     schedule:
@@ -20,6 +24,14 @@ updates:
     groups:
       minor-and-patch:
         applies-to: version-updates
+        # azle is a 0.x package, so a semver "minor" (0.33 -> 0.34) is a
+        # breaking change. It is also the canister CDK, which means a bump can
+        # alter stable-memory layout — and CI cannot catch that: the e2e suite
+        # deploys to a fresh replica every run, so an upgrade-safety regression
+        # passes green while corrupting a deployed canister's state. Excluded
+        # from the group so it gets its own PR and a human merges it.
+        exclude-patterns:
+          - "azle"
         update-types:
           - minor
           - patch

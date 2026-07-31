@@ -1,11 +1,15 @@
 name: automerge-deps
 
-# Auto-merges Dependabot's GROUPED patch/minor PRs after keep-green passes on
-# the PR (workflow_run = base-branch code + write token; never executes PR code
-# with credentials). Majors are config-ignored; anything else stays human.
+# Auto-merges Dependabot's GROUPED patch/minor PRs after CI passes on the PR
+# (workflow_run = base-branch code + write token; never executes PR code with
+# credentials). Anything not in the grouped patch/minor set stays human: npm
+# majors are config-ignored, action majors and azle arrive as their own PRs.
+#
+# Previously waited on "keep-green", which was deleted in 37c388b before this
+# repo was archived — so this workflow could never fire. CI replaced it.
 on:
   workflow_run:
-    workflows: ["keep-green"]
+    workflows: ["CI"]
     types: [completed]
 
 permissions:
