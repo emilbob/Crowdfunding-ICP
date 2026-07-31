@@ -41,8 +41,12 @@ jobs:
           curl -fsSL https://internetcomputer.org/install.sh -o /tmp/install-dfx.sh
           DFXVM_INIT_YES=true sh /tmp/install-dfx.sh
           # dfxvm's install location differs by platform; add whichever exists.
+          # Note the `if` rather than `[ -d ... ] &&`: these steps run under
+          # `bash -e`, so a false test as the last command fails the step.
           for d in "$HOME/.local/share/dfx/bin" "$HOME/Library/Application Support/org.dfinity.dfx/bin"; do
-            [ -d "$d" ] && echo "$d" >> "$GITHUB_PATH"
+            if [ -d "$d" ]; then
+              echo "$d" >> "$GITHUB_PATH"
+            fi
           done
 
       - name: Verify dfx is on PATH
