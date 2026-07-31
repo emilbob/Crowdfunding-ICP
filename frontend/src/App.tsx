@@ -54,7 +54,14 @@ export default function App() {
                                           ledger.symbol
                                       )}
                             </p>
-                            <p className="tnum text-muted">
+                            {/* Full principal in `title` and a data attribute:
+                                it is truncated for layout, but people need the
+                                whole thing to fund or debug an account. */}
+                            <p
+                                className="tnum text-muted"
+                                title={principal.toText()}
+                                data-principal={principal.toText()}
+                            >
                                 {shortPrincipal(principal.toText())}
                             </p>
                         </div>

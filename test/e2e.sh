@@ -35,12 +35,12 @@ fi
 bash scripts/setup-local-canisters.sh || exit 1
 
 echo "=== preparing identities ==="
-for id in minter backer; do
+for id in crowdfund-minter backer; do
     dfx identity list 2>/dev/null | grep -qx "$id" || \
         dfx identity new "$id" --storage-mode plaintext >/dev/null 2>&1
 done
 OWNER=$(dfx identity get-principal --identity default)
-MINTER=$(dfx identity get-principal --identity minter)
+MINTER=$(dfx identity get-principal --identity crowdfund-minter)
 BACKER=$(dfx identity get-principal --identity backer)
 
 # Ensure the canisters exist before the reinstalls below; on a fresh replica

@@ -19,13 +19,28 @@ if [[ -z "$PRINCIPAL" ]]; then
     exit 1
 fi
 
-command dfx canister call icrc1_ledger icrc1_transfer --identity crowdfund-minter "(record {
+RESULT=$(command dfx canister call icrc1_ledger icrc1_transfer --identity crowdfund-minter "(record {
   to = record { owner = principal \"$PRINCIPAL\"; subaccount = null };
   fee = null;
   memo = null;
   from_subaccount = null;
   created_at_time = null;
   amount = $AMOUNT : nat;
-})" 2>&1 | grep -v "dfx is deprecated"
+})" 2>&1 | grep -v "dfx is deprecated")
+
+echo "$RESULT"
+
+# The ledger reports failures inside an Ok/Err variant, not via exit status, so
+# a bare call looks successful even when nothing moved.
+if [[ "$RESULT" != *"Ok ="* ]]; then
+    echo >&2
+    echo "mint FAILED — nothing was transferred." >&2
+    if [[ "$RESULT" == *InsufficientFunds* ]]; then
+        echo "The crowdfund-minter identity is not this ledger's minting account." >&2
+        echo "Running 'npm run test:e2e' reinstalls the ledger with its own test" >&2
+        echo "minter, which clobbers the dev one. Re-run 'npm run deploy:local'." >&2
+    fi
+    exit 1
+fi
 
 echo "minted $AMOUNT to $PRINCIPAL"
