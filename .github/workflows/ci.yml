@@ -47,8 +47,11 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: frontend/package-lock.json
-      - run: npm --prefix frontend ci
-      - run: npm --prefix frontend run build:demo
+      # Same commands as vercel.json, deliberately. `npm --prefix <dir> ci`
+      # does not locate the lockfile on npm 11 (Node 24, which Vercel uses),
+      # so this mirror must not drift back to --prefix.
+      - run: cd frontend && npm ci
+      - run: cd frontend && npm run build:demo
 
   build-and-test:
     runs-on: ubuntu-latest
