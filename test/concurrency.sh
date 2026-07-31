@@ -19,7 +19,17 @@ set -uo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 1
 
-dfx() { command dfx "$@" 2>&1 | grep -v "dfx is deprecated"; }
+# Filters dfx's deprecation banner while PRESERVING its exit status. A bare
+# `command dfx ... | grep -v ...` returns *grep's* status, and a failing dfx
+# still prints error text for grep to match — so the `|| exit 1` guards below
+# would never fire.
+dfx() {
+    local output status
+    output=$(command dfx "$@" 2>&1)
+    status=$?
+    printf '%s\n' "$output" | grep -v "dfx is deprecated" || true
+    return $status
+}
 
 PASS=0
 FAIL=0
