@@ -7,7 +7,16 @@ set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
-dfx() { command dfx "$@" 2>&1 | grep -v "dfx is deprecated" || true; }
+# Filters dfx's deprecation banner while PRESERVING its exit status. A naive
+# `command dfx ... | grep -v ... || true` swallows every failure, which made
+# this script report a successful deploy after the frontend build had failed.
+dfx() {
+    local output status
+    output=$(command dfx "$@" 2>&1)
+    status=$?
+    printf '%s\n' "$output" | grep -v "dfx is deprecated" || true
+    return $status
+}
 
 if ! command dfx ping >/dev/null 2>&1; then
     echo "no local replica — run 'npm run start' first" >&2
@@ -71,6 +80,11 @@ dfx deploy crowdfund --argument "(principal \"$LEDGER\")"
 
 echo
 echo "=== frontend ==="
+# The root `npm install` does not reach frontend/, which has its own manifest.
+if [[ ! -d frontend/node_modules ]]; then
+    echo "installing frontend dependencies"
+    npm --prefix frontend ci
+fi
 # The frontend imports dfx's generated Candid bindings, which are gitignored.
 # `dfx build` does not produce them — only `dfx generate` does — so a fresh
 # clone needs this before the Vite build can resolve @declarations/*.
