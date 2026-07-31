@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      # Azle's postinstall shells out to dfx. The typecheck does not need a
+      # canister build, so skip scripts here and keep this job fast; the
+      # build-and-test job below covers the real install path.
+      - run: npm ci --ignore-scripts
+      - run: npm run typecheck
+
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dfx
+        run: |
+          curl -fsSL https://internetcomputer.org/install.sh -o /tmp/install-dfx.sh
+          DFXVM_INIT_YES=true sh /tmp/install-dfx.sh
+          # dfxvm's install location differs by platform; add whichever exists.
+          # Note the `if` rather than `[ -d ... ] &&`: these steps run under
+          # `bash -e`, so a false test as the last command fails the step.
+          for d in "$HOME/.local/share/dfx/bin" "$HOME/Library/Application Support/org.dfinity.dfx/bin"; do
+            if [ -d "$d" ]; then
+              echo "$d" >> "$GITHUB_PATH"
+            fi
+          done
+
+      - name: Verify dfx is on PATH
+        run: dfx --version
+
+      - run: npm ci
+
+      - name: Start local replica
+        run: dfx start --background --clean
+
+      - name: Build canister
+        run: |
+          dfx canister create crowdfund
+          dfx build crowdfund
+
+      - name: End-to-end tests against a real ICRC ledger
+        run: npm run test:e2e
+
+      - name: Stop local replica
+        if: always()
+        run: dfx stop || true

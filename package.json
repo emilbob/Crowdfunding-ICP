@@ -1,16 +1,27 @@
 {
   "name": "crowdfund",
-  "main": "index.js",
+  "version": "2.0.0",
+  "description": "Internet Computer canister for crowdfunding campaigns with ICRC-1/ICRC-2 token settlement, written in TypeScript with Azle.",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "start": "dfx start --background",
+    "start:clean": "dfx start --background --clean",
+    "build": "dfx build",
+    "deploy": "dfx deploy",
+    "stop": "dfx stop",
+    "test:e2e": "bash test/e2e.sh"
+  },
   "dependencies": {
-    "@dfinity/agent": "^0.19.2",
-    "@dfinity/candid": "^0.19.2",
-    "azle": "^0.20.1",
-    "uuid": "^14.0.1"
+    "azle": "^0.33.0"
   },
   "engines": {
-    "node": "^12 || ^14 || ^16 || ^18"
+    "node": ">=20"
   },
   "devDependencies": {
-    "@types/uuid": "^9.0.1"
+    "@types/node": "^22.20.1",
+    "typescript": "^5.9.3"
   }
 }
