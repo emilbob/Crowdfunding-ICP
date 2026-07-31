@@ -42,7 +42,6 @@
     --danger: oklch(0.56 0.19 25);
     --danger-soft: oklch(0.96 0.03 25);
     --shadow-card: 0 1px 2px oklch(0.22 0.02 265 / 0.05), 0 8px 24px -12px oklch(0.22 0.02 265 / 0.18);
-    --grid-line: oklch(0.22 0.02 265 / 0.045);
 }
 
 [data-theme='dark'] {
@@ -62,7 +61,6 @@
     --danger: oklch(0.7 0.17 25);
     --danger-soft: oklch(0.3 0.06 25);
     --shadow-card: 0 1px 2px oklch(0 0 0 / 0.3), 0 10px 30px -14px oklch(0 0 0 / 0.6);
-    --grid-line: oklch(1 0 0 / 0.035);
 }
 
 @layer base {
@@ -79,11 +77,6 @@
         background-color: var(--canvas);
         color: var(--ink);
         -webkit-font-smoothing: antialiased;
-        /* A faint blueprint grid, so the canvas is not a flat slab. */
-        background-image:
-            linear-gradient(var(--grid-line) 1px, transparent 1px),
-            linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-        background-size: 56px 56px;
     }
 
     /* Colour transitions only — transitioning `all` makes layout jump. */
