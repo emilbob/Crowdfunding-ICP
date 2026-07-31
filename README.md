@@ -85,22 +85,54 @@ npm run start:clean
 
 ## Deploying
 
-The canister takes the ledger's principal as an **init argument**:
-
-```bash
-npm run start
-
-# Against the mainnet ICP ledger
-dfx deploy crowdfund --argument '(principal "ryjl3-tyaaa-aaaaa-aaaba-cai")'
-```
-
-For local development, deploy an ICRC-1/ICRC-2 ledger first (see the [ICRC-1 ledger setup guide](https://internetcomputer.org/docs/current/developer-docs/defi/tokens/ledger/setup/icrc1_ledger_setup)) and pass its canister id instead.
-
-Verify what the canister is settling against at any time:
+The canister takes the ledger's principal as an **init argument** — it is not hardcoded, and the frontend reads it back at runtime via `getLedger`. Verify what a deployment is settling against at any time:
 
 ```bash
 dfx canister call crowdfund getLedger '()'
 ```
+
+### Locally
+
+`npm run deploy:local` handles everything (see [Getting started](#getting-started)).
+
+### To mainnet
+
+`dfx.json` marks the ledger and Internet Identity as **`remote`**, so a mainnet deploy does *not* create copies of them — it wires straight to the real ones. Only `crowdfund` and `crowdfund_frontend` are created.
+
+**1. Choose a ledger.** This decides whether contributions cost real money.
+
+| Ledger | Canister id | Notes |
+| --- | --- | --- |
+| **ckTESTBTC** | `mc6ru-gyaaa-aaaar-qaaaq-cai` | Test bitcoin, **no real value**, ICRC-2 supported, fee 10. Free from a [faucet](https://internetcomputer.org/docs/current/developer-docs/multi-chain/bitcoin/ckbtc/testing). The right choice for a demo. |
+| **ICP** | `ryjl3-tyaaa-aaaaa-aaaba-cai` | **Real money.** Every contribution spends actual ICP. |
+
+**2. Use a secure identity.** The default dfx identity is stored in plaintext, and dfx will warn you about using it against mainnet. Whatever identity you deploy with becomes the canisters' controller:
+
+```bash
+dfx identity new mainnet --storage-mode keyring
+dfx identity use mainnet
+```
+
+**3. Fund it with cycles.** Canisters need cycles for compute and storage, converted from ICP or claimed once from the [cycles faucet](https://internetcomputer.org/docs/current/developer-docs/getting-started/cycles/cycles-faucet). Note that **a canister which runs out of cycles is deleted, not merely stopped** — a mainnet deployment is an ongoing commitment, not a one-off.
+
+**4. Deploy.**
+
+```bash
+dfx deploy --network ic crowdfund --argument '(principal "mc6ru-gyaaa-aaaar-qaaaq-cai")'
+dfx deploy --network ic crowdfund_frontend
+```
+
+The frontend is then served at `https://<crowdfund_frontend-id>.icp0.io`, and sign-in uses the real Internet Identity automatically — `isLocalReplica` is false on any non-local network, so the agent skips the root-key fetch and points at `identity.ic0.app`.
+
+### Why not the playground
+
+`dfx deploy --playground` **cannot work for this canister.** Azle bundles a JavaScript runtime, so the wasm install payload is ~3.5 MB against the playground's 2 MB limit:
+
+```
+application payload size (3517461) cannot be larger than 2097152
+```
+
+This is a hard platform limit, not something to tune around. Mainnet has no such restriction — it installs large wasms in chunks.
 
 ## Methods
 

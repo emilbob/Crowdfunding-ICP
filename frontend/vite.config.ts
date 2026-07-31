@@ -11,10 +11,12 @@ const network = process.env.DFX_NETWORK ?? 'local';
 // Canister ids come from dfx's own output rather than a hand-maintained .env,
 // so the frontend cannot drift from what is actually deployed.
 function canisterIds(): Record<string, string> {
+    // Mainnet ids are committed at the repo root; every other network keeps
+    // them under .dfx/<network>/, including `playground`.
     const file =
         network === 'ic'
             ? `${here}../canister_ids.json`
-            : `${here}../.dfx/local/canister_ids.json`;
+            : `${here}../.dfx/${network}/canister_ids.json`;
 
     if (!existsSync(file)) {
         console.warn(

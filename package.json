@@ -14,7 +14,8 @@
     "stop": "dfx stop",
     "test:e2e": "bash test/e2e.sh",
     "deploy:local": "bash scripts/deploy-local.sh",
-    "setup:local": "bash scripts/setup-local-canisters.sh"
+    "setup:local": "bash scripts/setup-local-canisters.sh",
+    "test:concurrency": "bash test/concurrency.sh"
   },
   "dependencies": {
     "azle": "^0.33.0"

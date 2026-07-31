@@ -2,7 +2,16 @@ declare const __CANISTER_IDS__: Record<string, string>;
 declare const __DFX_NETWORK__: string;
 
 export const network = __DFX_NETWORK__;
-export const isMainnet = network === 'ic';
+
+/**
+ * Whether we are talking to a local replica, as opposed to the real IC.
+ *
+ * The distinction is not `network === 'ic'`: the **playground** borrows
+ * short-lived canisters on the real IC network, so it needs mainnet treatment —
+ * no root-key fetch, and the real Internet Identity. Anything that is not an
+ * explicitly local network is therefore treated as the real thing.
+ */
+export const isLocalReplica = network === 'local';
 
 const ids = __CANISTER_IDS__;
 
@@ -36,7 +45,7 @@ export const host = window.location.origin;
  * lands on /manage and never starts the delegation flow.
  */
 export function identityProvider(): string {
-    if (isMainnet) {
+    if (!isLocalReplica) {
         return 'https://identity.ic0.app/#authorize';
     }
     const local = internetIdentityCanisterId();
