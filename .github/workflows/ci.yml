@@ -73,6 +73,9 @@ jobs:
 
       - name: Build frontend
         run: |
+          # The frontend imports dfx's generated Candid bindings, which are
+          # gitignored. `dfx build` does not produce them — only `dfx generate`.
+          dfx generate crowdfund
           npm --prefix frontend ci
           npm --prefix frontend run build
 

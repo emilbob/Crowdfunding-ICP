@@ -71,6 +71,10 @@ dfx deploy crowdfund --argument "(principal \"$LEDGER\")"
 
 echo
 echo "=== frontend ==="
+# The frontend imports dfx's generated Candid bindings, which are gitignored.
+# `dfx build` does not produce them — only `dfx generate` does — so a fresh
+# clone needs this before the Vite build can resolve @declarations/*.
+dfx generate crowdfund
 dfx deploy crowdfund_frontend
 
 FRONTEND=$(command dfx canister id crowdfund_frontend 2>/dev/null)
