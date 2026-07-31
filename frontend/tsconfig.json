@@ -24,7 +24,7 @@
     "baseUrl": ".",
     "paths": {
       "@declarations/*": [
-        "../src/declarations/*"
+        "./src/declarations/*"
       ]
     }
   },

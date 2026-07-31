@@ -4,7 +4,7 @@
       "type": "azle",
       "main": "src/index.ts",
       "declarations": {
-        "output": "src/declarations/crowdfund",
+        "output": "frontend/src/declarations/crowdfund",
         "node_compatibility": true
       }
     },

@@ -50,8 +50,17 @@ jobs:
       # Same commands as vercel.json, deliberately. `npm --prefix <dir> ci`
       # does not locate the lockfile on npm 11 (Node 24, which Vercel uses),
       # so this mirror must not drift back to --prefix.
-      - run: cd frontend && npm ci
-      - run: cd frontend && npm run build:demo
+      # Build from a COPY of frontend/ with no parent repo around it. Vercel's
+      # root directory is frontend/, so anything the build reaches for above it
+      # — @types/node from the root node_modules was one — is absent there but
+      # present in a normal checkout. Copying is what makes this a real mirror
+      # rather than an approximation.
+      - name: Build the demo in isolation
+        run: |
+          cp -r frontend "$RUNNER_TEMP/isolated"
+          cd "$RUNNER_TEMP/isolated"
+          npm ci
+          npm run build:demo
 
   build-and-test:
     runs-on: ubuntu-latest
@@ -100,8 +109,8 @@ jobs:
       - name: Candid bindings are up to date
         run: |
           dfx generate crowdfund
-          git diff --exit-code -- src/declarations || {
-            echo "::error::src/declarations is stale — run 'dfx generate crowdfund' and commit the result"
+          git diff --exit-code -- frontend/src/declarations || {
+            echo "::error::frontend/src/declarations is stale — run 'dfx generate crowdfund' and commit the result"
             exit 1
           }
 
