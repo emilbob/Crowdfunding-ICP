@@ -1,3 +1,5 @@
+import { isDemo } from './env';
+
 declare const __CANISTER_IDS__: Record<string, string>;
 declare const __DFX_NETWORK__: string;
 
@@ -16,6 +18,10 @@ export const isLocalReplica = network === 'local';
 const ids = __CANISTER_IDS__;
 
 function required(name: string): string {
+    // Demo mode never reaches an actor that needs a real id.
+    if (isDemo) {
+        return 'aaaaa-aa';
+    }
     const id = ids[name];
     if (!id) {
         throw new Error(

@@ -31,7 +31,7 @@ If step 1 is missing or too small, `contribute` returns a `LedgerError` explaini
 ### Prerequisites
 
 - [Node.js](https://nodejs.org) 20 or newer
-- [DFX](https://internetcomputer.org/docs/current/developer-docs/getting-started/install) — the IC SDK. Azle's install step invokes `dfx`, so install DFX **before** running `npm install`.
+- [DFX](https://docs.internetcomputer.org/building-apps/getting-started/install) — the IC SDK. Azle's install step invokes `dfx`, so install DFX **before** running `npm install`.
 - An ICRC-1/ICRC-2 ledger canister to settle against (the ICP ledger, or a local ledger for development)
 
 ### Installation
@@ -103,7 +103,7 @@ dfx canister call crowdfund getLedger '()'
 
 | Ledger | Canister id | Notes |
 | --- | --- | --- |
-| **ckTESTBTC** | `mc6ru-gyaaa-aaaar-qaaaq-cai` | Test bitcoin, **no real value**, ICRC-2 supported, fee 10. Free from a [faucet](https://internetcomputer.org/docs/current/developer-docs/multi-chain/bitcoin/ckbtc/testing). The right choice for a demo. |
+| **ckTESTBTC** | `mc6ru-gyaaa-aaaar-qaaaq-cai` | Test bitcoin, **no real value**, ICRC-2 supported, fee 10. No real value, so a bug costs nothing. See the [ckBTC reference](https://docs.internetcomputer.org/references/ckbtc-reference). The right choice for a demo. |
 | **ICP** | `ryjl3-tyaaa-aaaaa-aaaba-cai` | **Real money.** Every contribution spends actual ICP. |
 
 **2. Use a secure identity.** The default dfx identity is stored in plaintext, and dfx will warn you about using it against mainnet. Whatever identity you deploy with becomes the canisters' controller:
@@ -113,7 +113,7 @@ dfx identity new mainnet --storage-mode keyring
 dfx identity use mainnet
 ```
 
-**3. Fund it with cycles.** Canisters need cycles for compute and storage, converted from ICP or claimed once from the [cycles faucet](https://internetcomputer.org/docs/current/developer-docs/getting-started/cycles/cycles-faucet). Note that **a canister which runs out of cycles is deleted, not merely stopped** — a mainnet deployment is an ongoing commitment, not a one-off.
+**3. Fund it with cycles.** Canisters pay for their own compute and storage in cycles, obtained by converting ICP — see [tokens and cycles](https://docs.internetcomputer.org/building-apps/getting-started/tokens-and-cycles). **There is no free way to keep a canister alive**: cycles are consumed continuously, and a canister that runs out is *deleted*, not merely stopped. Mainnet is an ongoing commitment, not a one-off. (DFINITY has at times offered a free cycles grant to new developers; check the current docs rather than assuming it applies.)
 
 **4. Deploy.**
 
