@@ -1,0 +1,11 @@
+service: (principal) -> {
+    contribute: (text, nat) -> (variant {Ok:text; Err:variant {AuthorizationError:text; ContributionError:text; CampaignNotFound:text; ValidationError:text; LedgerError:text}});
+    createCampaign: (record {durationDays:nat64; title:text; goalAmount:nat; description:text}) -> (variant {Ok:text; Err:variant {AuthorizationError:text; ContributionError:text; CampaignNotFound:text; ValidationError:text; LedgerError:text}});
+    deleteCampaign: (text) -> (variant {Ok:text; Err:variant {AuthorizationError:text; ContributionError:text; CampaignNotFound:text; ValidationError:text; LedgerError:text}});
+    getCampaign: (text) -> (variant {Ok:record {id:text; title:text; goalAmount:nat; endDate:nat64; owner:principal; description:text; currentAmount:nat; withdrawn:bool; startDate:nat64}; Err:variant {AuthorizationError:text; ContributionError:text; CampaignNotFound:text; ValidationError:text; LedgerError:text}}) query;
+    getCampaigns: () -> (variant {Ok:vec record {id:text; title:text; goalAmount:nat; endDate:nat64; owner:principal; description:text; currentAmount:nat; withdrawn:bool; startDate:nat64}; Err:variant {AuthorizationError:text; ContributionError:text; CampaignNotFound:text; ValidationError:text; LedgerError:text}}) query;
+    getLedger: () -> (principal) query;
+    listContributions: (text) -> (variant {Ok:vec record {refunded:bool; timestamp:nat64; amount:nat; contributor:principal}; Err:variant {AuthorizationError:text; ContributionError:text; CampaignNotFound:text; ValidationError:text; LedgerError:text}}) query;
+    refund: (text) -> (variant {Ok:text; Err:variant {AuthorizationError:text; ContributionError:text; CampaignNotFound:text; ValidationError:text; LedgerError:text}});
+    withdrawFunds: (text) -> (variant {Ok:text; Err:variant {AuthorizationError:text; ContributionError:text; CampaignNotFound:text; ValidationError:text; LedgerError:text}});
+}

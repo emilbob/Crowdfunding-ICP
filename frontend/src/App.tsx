@@ -7,6 +7,7 @@ import { ThemeToggle } from './components/ThemeToggle';
 import { useDapp } from './hooks/useDapp';
 import { useTheme } from './hooks/useTheme';
 import { network } from './lib/canisters';
+import { isDemo } from './lib/env';
 import { formatTokens, shortPrincipal } from './lib/format';
 
 const NOTICE_STYLES = {
@@ -82,9 +83,9 @@ export default function App() {
                             </h1>
                             <p className="flex items-center gap-1.5 text-[11px] leading-tight text-muted">
                                 On-chain campaigns
-                                {network !== 'ic' && (
+                                {(isDemo || network !== 'ic') && (
                                     <span className="rounded bg-warning-soft px-1.5 py-px font-medium text-warning">
-                                        {network}
+                                        {isDemo ? 'demo' : network}
                                     </span>
                                 )}
                             </p>
@@ -141,6 +142,25 @@ export default function App() {
             </header>
 
             <main className="mx-auto max-w-5xl px-5 py-8">
+                {isDemo && (
+                    <div className="themed mb-6 rounded-xl border border-warning/30 bg-warning-soft px-4 py-3">
+                        <p className="text-sm font-medium text-warning">
+                            Demo build — nothing here touches a blockchain
+                        </p>
+                        <p className="mt-1 text-xs text-warning/90">
+                            Campaigns, balances and sign-in are simulated in your
+                            browser and reset on reload. The interface, the
+                            two-step approve/contribute flow and every rule are
+                            the real ones; only the network is faked. Run it
+                            against a real canister with{' '}
+                            <code className="rounded bg-warning/15 px-1 py-0.5">
+                                npm run deploy:local
+                            </code>
+                            .
+                        </p>
+                    </div>
+                )}
+
                 {notice && (
                     <div
                         role="status"

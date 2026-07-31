@@ -1,0 +1,59 @@
+name: demo
+
+# Publishes the static demo build to GitHub Pages. The demo swaps the canister
+# and ledger actors for an in-memory backend, so it needs no replica, no
+# cycles, and no deployed canister — which is what makes it free to host.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/demo.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never cancel a deploy midway; queue instead.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - uses: actions/configure-pages@v6
+
+      # No dfx and no `dfx generate` here: the demo build never imports the
+      # generated Candid bindings, because its actors are the in-memory ones.
+      - run: npm --prefix frontend ci
+
+      - name: Build demo
+        env:
+          # Project sites are served from /<repo>/, so assets need that prefix.
+          DEMO_BASE: /${{ github.event.repository.name }}/
+        run: npm --prefix frontend run build:demo
+
+      # Pages serves no SPA fallback, so a deep link would 404 on reload.
+      # Copying index.html to 404.html makes the router-less app survive it.
+      - run: cp frontend/dist/index.html frontend/dist/404.html
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: frontend/dist
+
+      - id: deployment
+        uses: actions/deploy-pages@v5

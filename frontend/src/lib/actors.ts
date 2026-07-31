@@ -5,6 +5,8 @@ import { idlFactory as crowdfundIdlFactory } from '@declarations/crowdfund/crowd
 import type { _SERVICE as CrowdfundService } from '@declarations/crowdfund/crowdfund.did';
 
 import { crowdfundCanisterId, host, isLocalReplica } from './canisters';
+import { demoCrowdfundActor, demoLedgerActor } from './demo';
+import { isDemo } from './env';
 import { ledgerIdlFactory, type LedgerService } from './icrc';
 
 export type { CrowdfundService };
@@ -25,6 +27,9 @@ async function makeAgent(identity?: Identity): Promise<HttpAgent> {
 export async function crowdfundActor(
     identity?: Identity
 ): Promise<CrowdfundService> {
+    if (isDemo) {
+        return demoCrowdfundActor();
+    }
     const agent = await makeAgent(identity);
     return Actor.createActor<CrowdfundService>(crowdfundIdlFactory, {
         agent,
@@ -36,6 +41,9 @@ export async function ledgerActor(
     ledgerId: Principal,
     identity?: Identity
 ): Promise<LedgerService> {
+    if (isDemo) {
+        return demoLedgerActor();
+    }
     const agent = await makeAgent(identity);
     return Actor.createActor<LedgerService>(ledgerIdlFactory, {
         agent,

@@ -72,13 +72,26 @@ jobs:
           dfx canister create crowdfund
           dfx build crowdfund
 
+      # The generated Candid bindings are committed, because builds without dfx
+      # (the static demo, and its Pages workflow) import them statically and
+      # cannot produce them. Regenerating and diffing here is what stops the
+      # committed copy drifting from the canister. `dfx build` does not produce
+      # them — only `dfx generate` does.
+      - name: Candid bindings are up to date
+        run: |
+          dfx generate crowdfund
+          git diff --exit-code -- src/declarations || {
+            echo "::error::src/declarations is stale — run 'dfx generate crowdfund' and commit the result"
+            exit 1
+          }
+
       - name: Build frontend
         run: |
-          # The frontend imports dfx's generated Candid bindings, which are
-          # gitignored. `dfx build` does not produce them — only `dfx generate`.
-          dfx generate crowdfund
           npm --prefix frontend ci
           npm --prefix frontend run build
+
+      - name: Build static demo
+        run: npm --prefix frontend run build:demo
 
       - name: End-to-end tests against a real ICRC ledger
         run: npm run test:e2e

@@ -7,6 +7,9 @@ import { defineConfig } from 'vite';
 
 const here = fileURLToPath(new URL('.', import.meta.url));
 const network = process.env.DFX_NETWORK ?? 'local';
+const isDemo = process.env.VITE_DEMO === '1';
+// GitHub Pages serves project sites from /<repo>/, so assets need that prefix.
+const base = process.env.DEMO_BASE ?? (isDemo ? '/Crowdfunding-ICP/' : '/');
 
 // Canister ids come from dfx's own output rather than a hand-maintained .env,
 // so the frontend cannot drift from what is actually deployed.
@@ -37,6 +40,7 @@ function canisterIds(): Record<string, string> {
 }
 
 export default defineConfig({
+    base,
     plugins: [react(), tailwindcss()],
     resolve: {
         alias: {
