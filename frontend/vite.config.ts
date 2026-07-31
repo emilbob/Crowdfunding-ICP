@@ -8,12 +8,22 @@ import { defineConfig } from 'vite';
 const here = fileURLToPath(new URL('.', import.meta.url));
 const network = process.env.DFX_NETWORK ?? 'local';
 const isDemo = process.env.VITE_DEMO === '1';
-// GitHub Pages serves project sites from /<repo>/, so assets need that prefix.
-const base = process.env.DEMO_BASE ?? (isDemo ? '/Crowdfunding-ICP/' : '/');
+// Root-relative by default, which is correct for Vercel, Netlify, Render and
+// any other host serving from a domain root. GitHub Pages project sites are the
+// exception — they serve from /<repo>/ — so that workflow sets DEMO_BASE itself.
+// Defaulting the other way round meant forgetting the variable produced a build
+// whose assets all 404, silently.
+const base = process.env.DEMO_BASE ?? '/';
 
 // Canister ids come from dfx's own output rather than a hand-maintained .env,
 // so the frontend cannot drift from what is actually deployed.
 function canisterIds(): Record<string, string> {
+    // The demo talks to an in-memory backend, so there is no deployment to read
+    // ids from — and no .dfx directory in a checkout that has never run dfx.
+    if (isDemo) {
+        return {};
+    }
+
     // Mainnet ids are committed at the repo root; every other network keeps
     // them under .dfx/<network>/, including `playground`.
     const file =
