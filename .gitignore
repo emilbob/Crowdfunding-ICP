@@ -20,5 +20,12 @@ dist/
 # environment variables
 .env
 .azle
-# downloaded test ledger artifacts
-test/.ledger/
+
+# downloaded third-party canisters (ledger, internet identity)
+.local-canisters/
+
+# frontend build output
+frontend/dist/
+
+# typescript incremental build cache
+*.tsbuildinfo

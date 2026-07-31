@@ -12,7 +12,9 @@
     "build": "dfx build",
     "deploy": "dfx deploy",
     "stop": "dfx stop",
-    "test:e2e": "bash test/e2e.sh"
+    "test:e2e": "bash test/e2e.sh",
+    "deploy:local": "bash scripts/deploy-local.sh",
+    "setup:local": "bash scripts/setup-local-canisters.sh"
   },
   "dependencies": {
     "azle": "^0.33.0"

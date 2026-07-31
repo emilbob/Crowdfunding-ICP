@@ -7,6 +7,37 @@
         "output": "src/declarations/crowdfund",
         "node_compatibility": true
       }
+    },
+    "crowdfund_frontend": {
+      "type": "assets",
+      "source": [
+        "frontend/dist"
+      ],
+      "dependencies": [
+        "crowdfund",
+        "internet_identity"
+      ],
+      "build": "npm --prefix frontend run build"
+    },
+    "icrc1_ledger": {
+      "type": "custom",
+      "wasm": ".local-canisters/icrc1_ledger.wasm.gz",
+      "candid": ".local-canisters/icrc1_ledger.did",
+      "remote": {
+        "id": {
+          "ic": "ryjl3-tyaaa-aaaaa-aaaba-cai"
+        }
+      }
+    },
+    "internet_identity": {
+      "type": "custom",
+      "wasm": ".local-canisters/internet_identity.wasm.gz",
+      "candid": ".local-canisters/internet_identity.did",
+      "remote": {
+        "id": {
+          "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+        }
+      }
     }
   }
 }
