@@ -27,10 +27,11 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npm run typecheck
 
-      - name: Typecheck frontend
-        run: |
-          npm --prefix frontend ci
-          npm --prefix frontend run typecheck
+      # The frontend is deliberately NOT typechecked here. It imports dfx's
+      # generated Candid bindings, which need dfx to produce — and installing
+      # dfx would make this job as slow as the one below. build-and-test
+      # typechecks it anyway: the frontend's build script is `tsc -b && vite
+      # build`, so a type error fails that job.
 
   build-and-test:
     runs-on: ubuntu-latest
