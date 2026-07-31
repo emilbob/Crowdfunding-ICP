@@ -25,7 +25,8 @@
       "candid": ".local-canisters/icrc1_ledger.did",
       "remote": {
         "id": {
-          "ic": "ryjl3-tyaaa-aaaaa-aaaba-cai"
+          "ic": "ryjl3-tyaaa-aaaaa-aaaba-cai",
+          "playground": "ryjl3-tyaaa-aaaaa-aaaba-cai"
         }
       }
     },
@@ -35,7 +36,8 @@
       "candid": ".local-canisters/internet_identity.did",
       "remote": {
         "id": {
-          "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+          "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai",
+          "playground": "rdmx6-jaaaa-aaaaa-aaadq-cai"
         }
       }
     }
