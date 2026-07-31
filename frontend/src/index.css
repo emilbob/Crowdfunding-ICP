@@ -1,31 +1,143 @@
 @import 'tailwindcss';
 
-@theme {
-    --color-ink: oklch(0.21 0.02 260);
-    --color-muted: oklch(0.52 0.02 260);
-    --color-line: oklch(0.92 0.005 260);
-    --color-surface: oklch(1 0 0);
-    --color-canvas: oklch(0.98 0.004 260);
-    --color-accent: oklch(0.55 0.16 255);
-    --color-positive: oklch(0.58 0.14 155);
-    --color-warning: oklch(0.65 0.15 75);
-    --color-danger: oklch(0.58 0.19 25);
+/* Theme is driven by data-theme on <html>, set by useTheme from an explicit
+   choice or the OS preference. Using an attribute rather than prefers-color-scheme
+   alone is what lets the toggle override the system. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* `inline` so the utilities emit var() references and follow the theme at
+   runtime, instead of being resolved to fixed colours at build time. */
+@theme inline {
+    --color-canvas: var(--canvas);
+    --color-surface: var(--surface);
+    --color-raised: var(--raised);
+    --color-ink: var(--ink);
+    --color-muted: var(--muted);
+    --color-line: var(--line);
+    --color-accent: var(--accent);
+    --color-accent-soft: var(--accent-soft);
+    --color-on-accent: var(--on-accent);
+    --color-positive: var(--positive);
+    --color-positive-soft: var(--positive-soft);
+    --color-warning: var(--warning);
+    --color-warning-soft: var(--warning-soft);
+    --color-danger: var(--danger);
+    --color-danger-soft: var(--danger-soft);
+}
+
+:root {
+    --canvas: oklch(0.985 0.003 265);
+    --surface: oklch(1 0 0);
+    --raised: oklch(0.975 0.004 265);
+    --ink: oklch(0.22 0.02 265);
+    --muted: oklch(0.52 0.015 265);
+    --line: oklch(0.91 0.006 265);
+    --accent: oklch(0.55 0.18 262);
+    --accent-soft: oklch(0.95 0.035 262);
+    --on-accent: oklch(1 0 0);
+    --positive: oklch(0.55 0.14 155);
+    --positive-soft: oklch(0.95 0.04 155);
+    --warning: oklch(0.62 0.14 70);
+    --warning-soft: oklch(0.96 0.05 70);
+    --danger: oklch(0.56 0.19 25);
+    --danger-soft: oklch(0.96 0.03 25);
+    --shadow-card: 0 1px 2px oklch(0.22 0.02 265 / 0.05), 0 8px 24px -12px oklch(0.22 0.02 265 / 0.18);
+}
+
+[data-theme='dark'] {
+    --canvas: oklch(0.165 0.014 265);
+    --surface: oklch(0.205 0.016 265);
+    --raised: oklch(0.245 0.018 265);
+    --ink: oklch(0.96 0.004 265);
+    --muted: oklch(0.68 0.014 265);
+    --line: oklch(0.3 0.016 265);
+    --accent: oklch(0.72 0.15 262);
+    --accent-soft: oklch(0.3 0.06 262);
+    --on-accent: oklch(0.16 0.02 265);
+    --positive: oklch(0.75 0.15 155);
+    --positive-soft: oklch(0.29 0.05 155);
+    --warning: oklch(0.79 0.14 70);
+    --warning-soft: oklch(0.3 0.05 70);
+    --danger: oklch(0.7 0.17 25);
+    --danger-soft: oklch(0.3 0.06 25);
+    --shadow-card: 0 1px 2px oklch(0 0 0 / 0.3), 0 10px 30px -14px oklch(0 0 0 / 0.6);
 }
 
 @layer base {
     html {
+        /* Keeps form controls and scrollbars in step with the theme. */
         color-scheme: light;
     }
 
+    html[data-theme='dark'] {
+        color-scheme: dark;
+    }
+
     body {
-        background-color: var(--color-canvas);
-        color: var(--color-ink);
-        font-feature-settings: 'tnum' 1;
+        background-color: var(--canvas);
+        color: var(--ink);
         -webkit-font-smoothing: antialiased;
     }
 
-    /* Amounts and principals line up in columns when digits are tabular. */
+    /* Colour transitions only — transitioning `all` makes layout jump. */
+    body,
+    .themed {
+        transition:
+            background-color 0.25s ease,
+            border-color 0.25s ease,
+            color 0.25s ease;
+    }
+
+    :focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+        border-radius: 4px;
+    }
+}
+
+@layer utilities {
     .tnum {
         font-variant-numeric: tabular-nums;
+    }
+
+    .card-hover {
+        transition:
+            transform 0.2s ease,
+            box-shadow 0.2s ease,
+            border-color 0.2s ease;
+    }
+
+    .card-hover:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-card);
+    }
+
+    .rise {
+        animation: rise 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+}
+
+@keyframes rise {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .card-hover:hover {
+        transform: none;
     }
 }

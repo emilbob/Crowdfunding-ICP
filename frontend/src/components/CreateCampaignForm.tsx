@@ -14,6 +14,10 @@ type Props = {
     }) => Promise<boolean>;
 };
 
+const FIELD =
+    'mt-1.5 w-full rounded-lg border border-line bg-canvas px-3 py-2 text-sm outline-none transition focus:border-accent';
+const LABEL = 'text-[11px] font-medium uppercase tracking-wider text-muted';
+
 export function CreateCampaignForm({ ledger, busy, onCreate }: Props) {
     const [open, setOpen] = useState(false);
     const [title, setTitle] = useState('');
@@ -72,8 +76,19 @@ export function CreateCampaignForm({ ledger, busy, onCreate }: Props) {
         return (
             <button
                 onClick={() => setOpen(true)}
-                className="rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white transition hover:opacity-90"
+                className="group inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-on-accent transition hover:opacity-90 active:scale-[0.98]"
             >
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    className="size-4 transition-transform group-hover:rotate-90"
+                    aria-hidden="true"
+                >
+                    <path d="M12 5.5v13M5.5 12h13" />
+                </svg>
                 Start a campaign
             </button>
         );
@@ -82,69 +97,78 @@ export function CreateCampaignForm({ ledger, busy, onCreate }: Props) {
     return (
         <form
             onSubmit={submit}
-            className="rounded-xl border border-line bg-surface p-5 shadow-sm"
+            className="rise themed rounded-xl border border-line bg-surface p-5"
         >
-            <h2 className="text-base font-semibold">Start a campaign</h2>
+            <h2 className="text-[15px] font-semibold tracking-tight">
+                Start a campaign
+            </h2>
+            <p className="mt-1 text-xs text-muted">
+                You become the owner and can withdraw once the goal is reached.
+            </p>
 
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
                 <label className="sm:col-span-2">
-                    <span className="text-xs font-medium text-muted">Title</span>
+                    <span className={LABEL}>Title</span>
                     <input
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         maxLength={100}
-                        className="mt-1 w-full rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-accent"
+                        className={FIELD}
                         placeholder="What are you raising for?"
                     />
                 </label>
 
                 <label className="sm:col-span-2">
-                    <span className="text-xs font-medium text-muted">
-                        Description
-                    </span>
+                    <span className={LABEL}>Description</span>
                     <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         rows={3}
                         maxLength={600}
-                        className="mt-1 w-full resize-y rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-accent"
+                        className={`${FIELD} resize-y`}
                         placeholder="What will the funds be used for?"
                     />
                 </label>
 
                 <label>
-                    <span className="text-xs font-medium text-muted">
-                        Goal ({ledger.symbol})
-                    </span>
-                    <input
-                        value={goal}
-                        onChange={(e) => setGoal(e.target.value)}
-                        inputMode="decimal"
-                        placeholder="0.00"
-                        className="tnum mt-1 w-full rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-accent"
-                    />
+                    <span className={LABEL}>Goal</span>
+                    <div className="relative">
+                        <input
+                            value={goal}
+                            onChange={(e) => setGoal(e.target.value)}
+                            inputMode="decimal"
+                            placeholder="0.00"
+                            className={`tnum ${FIELD} pr-14`}
+                        />
+                        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-muted">
+                            {ledger.symbol}
+                        </span>
+                    </div>
                 </label>
 
                 <label>
-                    <span className="text-xs font-medium text-muted">
-                        Duration (days, 1–365)
-                    </span>
-                    <input
-                        value={days}
-                        onChange={(e) => setDays(e.target.value)}
-                        inputMode="numeric"
-                        className="tnum mt-1 w-full rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-accent"
-                    />
+                    <span className={LABEL}>Duration</span>
+                    <div className="relative">
+                        <input
+                            value={days}
+                            onChange={(e) => setDays(e.target.value)}
+                            inputMode="numeric"
+                            className={`tnum ${FIELD} pr-14`}
+                        />
+                        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-muted">
+                            days
+                        </span>
+                    </div>
                 </label>
             </div>
 
             {error && <p className="mt-3 text-xs text-danger">{error}</p>}
 
-            <div className="mt-4 flex gap-2">
+            <div className="mt-5 flex gap-2">
                 <button
                     type="submit"
                     disabled={busy !== null}
-                    className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
+                    className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-on-accent transition hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
                 >
                     {busy === 'create' ? 'Creating…' : 'Create campaign'}
                 </button>
@@ -154,7 +178,7 @@ export function CreateCampaignForm({ ledger, busy, onCreate }: Props) {
                         reset();
                         setOpen(false);
                     }}
-                    className="rounded-lg border border-line px-4 py-2 text-sm transition hover:bg-canvas"
+                    className="rounded-lg border border-line px-4 py-2 text-sm transition hover:bg-raised"
                 >
                     Cancel
                 </button>
