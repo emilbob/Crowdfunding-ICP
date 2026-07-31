@@ -8,7 +8,22 @@ set -euo pipefail
 
 # Pinned deliberately. Bump on purpose, not by drift.
 IC_COMMIT="0c121276f3156e97de98151d5f6bec6b73695f9f"
-II_RELEASE="release-2026-07-28"
+
+# II is pinned to the LAST SINGLE-CANISTER RELEASE, and that is deliberate —
+# do not bump it to the newest tag without reading this.
+#
+# From release-2026-03 onward Internet Identity is split into separate backend
+# and frontend canisters. In those releases both internet_identity_dev.wasm.gz
+# and internet_identity_production.wasm.gz are backend-only: deployed on their
+# own they serve no assets at all, and the sign-in window gets a 503 "Response
+# Verification Error" (404 even on the raw domain). Deploying the companion
+# _frontend wasm alongside does not fix it either — it rejects the same init
+# argument, so the two need wiring this project has not worked out.
+#
+# 2026-02-28 is the newest release that still bundles frontend and backend in
+# one canister (2.0MB, versus ~1.2MB for the split backends — the size gap is
+# the giveaway). It deploys standalone and serves a working sign-in page.
+II_RELEASE="release-2026-02-28"
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/.local-canisters"
 mkdir -p "$DIR"
