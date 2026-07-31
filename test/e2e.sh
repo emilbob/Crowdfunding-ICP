@@ -69,6 +69,10 @@ cfg.canisters.icrc1_ledger = {
 fs.writeFileSync("dfx.json", JSON.stringify(cfg, null, 2) + "\n");
 ' "$LEDGER_DIR"
 
+# Ensure both canisters exist before the reinstalls below; on a fresh replica
+# (CI, or after `dfx start --clean`) they do not yet.
+dfx canister create --all >/dev/null 2>&1
+
 echo "=== deploying ledger ==="
 dfx deploy icrc1_ledger --mode reinstall --yes --argument "(variant { Init = record {
   minting_account = record { owner = principal \"$MINTER\"; subaccount = null };
