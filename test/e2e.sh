@@ -14,17 +14,6 @@ set -uo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 1
 
-DFX_JSON_BACKUP="$(mktemp)"
-RESTORED=0
-restore() {
-    if [[ $RESTORED -eq 0 && -s "$DFX_JSON_BACKUP" ]]; then
-        cp "$DFX_JSON_BACKUP" dfx.json
-        RESTORED=1
-        echo; echo "restored dfx.json"
-    fi
-}
-trap restore EXIT INT TERM
-
 dfx() { command dfx "$@" 2>&1 | grep -v "dfx is deprecated"; }
 
 PASS=0
@@ -43,8 +32,7 @@ if ! dfx ping >/dev/null 2>&1; then
     exit 1
 fi
 
-bash test/setup-ledger.sh || exit 1
-LEDGER_DIR="$(pwd)/test/.ledger"
+bash scripts/setup-local-canisters.sh || exit 1
 
 echo "=== preparing identities ==="
 for id in minter backer; do
@@ -55,23 +43,10 @@ OWNER=$(dfx identity get-principal --identity default)
 MINTER=$(dfx identity get-principal --identity minter)
 BACKER=$(dfx identity get-principal --identity backer)
 
-# Add the test ledger to dfx.json for the duration of this run only.
-cp dfx.json "$DFX_JSON_BACKUP"
-node -e '
-const fs = require("fs");
-const dir = process.argv[1];
-const cfg = JSON.parse(fs.readFileSync("dfx.json", "utf8"));
-cfg.canisters.icrc1_ledger = {
-    type: "custom",
-    wasm: dir + "/icrc1_ledger.wasm.gz",
-    candid: dir + "/icrc1_ledger.did"
-};
-fs.writeFileSync("dfx.json", JSON.stringify(cfg, null, 2) + "\n");
-' "$LEDGER_DIR"
-
-# Ensure both canisters exist before the reinstalls below; on a fresh replica
-# (CI, or after `dfx start --clean`) they do not yet.
-dfx canister create --all >/dev/null 2>&1
+# Ensure the canisters exist before the reinstalls below; on a fresh replica
+# (CI, or after `dfx start --clean`) they do not yet. The frontend is excluded:
+# it is not under test here and would drag in a full Vite build.
+dfx canister create crowdfund icrc1_ledger >/dev/null 2>&1
 
 echo "=== deploying ledger ==="
 dfx deploy icrc1_ledger --mode reinstall --yes --argument "(variant { Init = record {

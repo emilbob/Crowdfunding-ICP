@@ -27,6 +27,11 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npm run typecheck
 
+      - name: Typecheck frontend
+        run: |
+          npm --prefix frontend ci
+          npm --prefix frontend run typecheck
+
   build-and-test:
     runs-on: ubuntu-latest
     steps:
@@ -54,6 +59,10 @@ jobs:
 
       - run: npm ci
 
+      # dfx.json references these wasms, so fetch them before any dfx command.
+      - name: Fetch local third-party canisters
+        run: bash scripts/setup-local-canisters.sh
+
       - name: Start local replica
         run: dfx start --background --clean
 
@@ -61,6 +70,11 @@ jobs:
         run: |
           dfx canister create crowdfund
           dfx build crowdfund
+
+      - name: Build frontend
+        run: |
+          npm --prefix frontend ci
+          npm --prefix frontend run build
 
       - name: End-to-end tests against a real ICRC ledger
         run: npm run test:e2e
